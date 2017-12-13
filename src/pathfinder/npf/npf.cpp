@@ -1217,7 +1217,7 @@ FindDepotData NPFTrainFindNearestDepot(const Train *v, int max_penalty)
 	return FindDepotData(ftd.node.tile, ftd.best_path_dist, NPFGetFlag(&ftd.node, NPF_FLAG_REVERSE));
 }
 
-bool NPFTrainFindNearestSafeTile(const Train *v, TileIndex tile, Trackdir trackdir, bool override_railtype)
+PBSTileInfo NPFTrainFindNearestSafeTile(const Train *v, TileIndex tile, Trackdir trackdir, bool override_railtype)
 {
 	assert(v->type == VEH_TRAIN);
 
@@ -1235,7 +1235,8 @@ bool NPFTrainFindNearestSafeTile(const Train *v, TileIndex tile, Trackdir trackd
 	/* perform a breadth first search. Target is NULL,
 	 * since we are just looking for any safe tile...*/
 	AyStarUserData user = { v->owner, TRANSPORT_RAIL, railtypes, ROADTYPES_NONE };
-	return NPFRouteInternal(&start1, true, NULL, false, &fstd, NPFFindSafeTile, NPFCalcZero, &user, 0, true).res_okay;
+	NPFFoundTargetData ftd = NPFRouteInternal(&start1, true, NULL, false, &fstd, NPFFindSafeTile, NPFCalcZero, &user, 0, true);
+	return PBSTileInfo(ftd.node.tile, (Trackdir)ftd.node.direction, ftd.res_okay);
 }
 
 bool NPFTrainCheckReverse(const Train *v)

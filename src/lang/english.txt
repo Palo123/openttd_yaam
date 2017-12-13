@@ -1134,6 +1134,7 @@ STR_CONFIG_SETTING_COMPANIES_ALL                                :All companies
 STR_CONFIG_SETTING_NONE                                         :None
 STR_CONFIG_SETTING_ORIGINAL                                     :Original
 STR_CONFIG_SETTING_REALISTIC                                    :Realistic
+STR_CONFIG_SETTING_YAAM                                         :YAAM
 
 STR_CONFIG_SETTING_HORIZONTAL_POS_LEFT                          :Left
 STR_CONFIG_SETTING_HORIZONTAL_POS_CENTER                        :Centre
@@ -1178,6 +1179,8 @@ STR_CONFIG_SETTING_SMOKE_AMOUNT                                 :Amount of vehic
 STR_CONFIG_SETTING_SMOKE_AMOUNT_HELPTEXT                        :Set how much smoke or how many sparks are emitted by vehicles
 STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL                     :Train acceleration model: {STRING2}
 STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL_HELPTEXT            :Select the physics model for train acceleration. The "original" model penalises slopes equally for all vehicles. The "realistic" model penalises slopes and curves depending on various properties of the consist, like length and tractive effort
+STR_CONFIG_SETTING_YAAM_ACCELERATION                            :Acceleration speed for yaam: {STRING2}
+STR_CONFIG_SETTING_YAAM_ACCELERATION_HELPTEXT                   :Lower values for faster acceleration, Higher values for slower.
 STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL              :Road vehicle acceleration model: {STRING2}
 STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_HELPTEXT     :Select the physics model for road vehicle acceleration. The "original" model penalises slopes equally for all vehicles. The "realistic" model penalises slopes depending on various properties of the engine, for example 'tractive effort'
 STR_CONFIG_SETTING_TRAIN_SLOPE_STEEPNESS                        :Slope steepness for trains: {STRING2}
@@ -1702,6 +1705,17 @@ STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS                         :Pathfinder for 
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_HELPTEXT                :Path finder to use for ships
 STR_CONFIG_SETTING_REVERSE_AT_SIGNALS                           :Automatic reversing at signals: {STRING2}
 STR_CONFIG_SETTING_REVERSE_AT_SIGNALS_HELPTEXT                  :Allow trains to reverse on a signal, if they waited there a long time
+STR_CONFIG_SETTING_PBS_YELLOW                                   :Allow yellow path signals: {STRING2}
+STR_CONFIG_SETTING_PBS_YELLOW_HELPTEXT                          :When enabled, trains try to reserve more blocks. If there aren't enough free blocks, trains gradually slow down using yellow signal.
+STR_CONFIG_SETTING_PBS_YELLOW_SPEED                             :Maximum speed on yellow signal: {STRING2}
+STR_CONFIG_SETTING_PBS_YELLOW_SPEED_HELPTEXT                    :Maximum speed for trains after passing yellow signal
+STR_CONFIG_SETTING_PBS_DOUBLE_YELLOW_SPEED                      :Maximum speed on double yellow signal: {STRING2}
+STR_CONFIG_SETTING_PBS_DOUBLE_YELLOW_SPEED_HELPTEXT             :Maximum speed for trains after passing double yellow signal
+STR_CONFIG_SETTING_YELLOW_DOUBLE_YELLOW_SMALLER                 :{WHITE}Maximum speed on yellow signal must be smaller than maximum speed on double yellow signal, or they must be equal.
+STR_CONFIG_SETTING_PBS_WATCH_NEXT_SIGNAL                        :Allow trains to look at next signal: {STRING2}
+STR_CONFIG_SETTING_PBS_WATCH_NEXT_SIGNAL_HELPTEXT               :When enabled, trains watch, if next signal has bigger speed limit, so they can accelerate sooner.
+STR_CONFIG_SETTING_SLOW_DOWN_STATION                            :Slow down on last pbs before station: {STRING2}
+STR_CONFIG_SETTING_SLOW_DOWN_STATION_HELPTEXT                   :When entering station, make last pbs yellow. If turned off, make it green instead.
 
 STR_CONFIG_SETTING_QUERY_CAPTION                                :{WHITE}Change setting value
 
@@ -2362,12 +2376,16 @@ STR_BUILD_SIGNAL_SEMAPHORE_EXIT_TOOLTIP                         :{BLACK}Exit Sig
 STR_BUILD_SIGNAL_SEMAPHORE_COMBO_TOOLTIP                        :{BLACK}Combo Signal (semaphore){}The combo signal simply acts as both an entry and exit signal. This allows you to build large "trees" of pre-signals
 STR_BUILD_SIGNAL_SEMAPHORE_PBS_TOOLTIP                          :{BLACK}Path Signal (semaphore){}A path signal allows more than one train to enter a signal block at the same time, if the train can reserve a path to a safe stopping point. Standard path signals can be passed from the back side
 STR_BUILD_SIGNAL_SEMAPHORE_PBS_OWAY_TOOLTIP                     :{BLACK}One-way Path Signal (semaphore){}A path signal allows more than one train to enter a signal block at the same time, if the train can reserve a path to a safe stopping point. One-way path signals can't be passed from the back side
+STR_BUILD_SIGNAL_SEMAPHORE_PBS_LONG_TOOLTIP                     :{BLACK}3 Reservations Path Signal (semaphore){}A path signal allows more than one train to enter a signal block at the same time, if the train can reserve a path to a safe stopping point. Standard path signals can be passed from the back side
+STR_BUILD_SIGNAL_SEMAPHORE_PBS_LONG_OWAY_TOOLTIP                :{BLACK}One-way 3 Reservations Path Signal (semaphore){}A path signal allows more than one train to enter a signal block at the same time, if the train can reserve a path to a safe stopping point. One-way path signals can't be passed from the back side
 STR_BUILD_SIGNAL_ELECTRIC_NORM_TOOLTIP                          :{BLACK}Block Signal (electric){}This is the most basic type of signal, allowing only one train to be in the same block at the same time
 STR_BUILD_SIGNAL_ELECTRIC_ENTRY_TOOLTIP                         :{BLACK}Entry Signal (electric){}Green as long as there is one or more green exit-signal from the following section of track. Otherwise it shows red
 STR_BUILD_SIGNAL_ELECTRIC_EXIT_TOOLTIP                          :{BLACK}Exit Signal (electric){}Behaves in the same way as a block signal but is necessary to trigger the correct colour on entry & combo pre-signals
 STR_BUILD_SIGNAL_ELECTRIC_COMBO_TOOLTIP                         :{BLACK}Combo Signal (electric){}The combo signal simply acts as both an entry and exit signal. This allows you to build large "trees" of pre-signals
 STR_BUILD_SIGNAL_ELECTRIC_PBS_TOOLTIP                           :{BLACK}Path Signal (electric){}A path signal allows more than one train to enter a signal block at the same time, if the train can reserve a path to a safe stopping point. Standard path signals can be passed from the back side
 STR_BUILD_SIGNAL_ELECTRIC_PBS_OWAY_TOOLTIP                      :{BLACK}One-way Path Signal (electric){}A path signal allows more than one train to enter a signal block at the same time, if the train can reserve a path to a safe stopping point. One-way path signals can't be passed from the back side
+STR_BUILD_SIGNAL_ELECTRIC_PBS_LONG_TOOLTIP                      :{BLACK}3 Reservations Path Signal (electric){}A path signal allows more than one train to enter a signal block at the same time, if the train can reserve a path to a safe stopping point. Standard path signals can be passed from the back side
+STR_BUILD_SIGNAL_ELECTRIC_PBS_LONG_OWAY_TOOLTIP                 :{BLACK}One-way 3 Reservations Path Signal (electric){}A path signal allows more than one train to enter a signal block at the same time, if the train can reserve a path to a safe stopping point. One-way path signals can't be passed from the back side
 STR_BUILD_SIGNAL_CONVERT_TOOLTIP                                :{BLACK}Signal Convert{}When selected, clicking an existing signal will convert it to the selected signal type and variant. Ctrl+Click will toggle the existing variant. Shift+Click shows estimated conversion cost
 STR_BUILD_SIGNAL_DRAG_SIGNALS_DENSITY_TOOLTIP                   :{BLACK}Dragging signal density
 STR_BUILD_SIGNAL_DRAG_SIGNALS_DENSITY_DECREASE_TOOLTIP          :{BLACK}Decrease dragging signal density

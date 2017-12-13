@@ -288,7 +288,12 @@ static inline TrackBits GetDepotReservationTrackBits(TileIndex t)
 
 static inline bool IsPbsSignal(SignalType s)
 {
-	return s == SIGTYPE_PBS || s == SIGTYPE_PBS_ONEWAY;
+	return s == SIGTYPE_PBS || s == SIGTYPE_PBS_ONEWAY || s == SIGTYPE_PBS_LONG || s == SIGTYPE_PBS_LONG_ONEWAY;
+}
+
+static inline bool IsPbsSignalLong(SignalType s)
+{
+	return s == SIGTYPE_PBS_LONG || s == SIGTYPE_PBS_LONG_ONEWAY;
 }
 
 static inline SignalType GetSignalType(TileIndex t, Track track)
@@ -440,8 +445,13 @@ static inline SignalState GetSignalStateByTrackdir(TileIndex tile, Trackdir trac
 {
 	assert(IsValidTrackdir(trackdir));
 	assert(HasSignalOnTrack(tile, TrackdirToTrack(trackdir)));
-	return GetSignalStates(tile) & SignalAlongTrackdir(trackdir) ?
-		SIGNAL_STATE_GREEN : SIGNAL_STATE_RED;
+	Track track = TrackdirToTrack(trackdir);
+	if (IsPbsSignal(GetSignalType(tile, track))) {
+		return (SignalState)((GetSignalStates(tile) & SignalOnTrack(track)) >> (SignalOnTrack(track) == 0xC ? 2 : 0));
+	} else {
+		return GetSignalStates(tile) & SignalAlongTrackdir(trackdir) ?
+			SIGNAL_STATE_GREEN : SIGNAL_STATE_RED;
+	}      
 }
 
 /**
@@ -449,10 +459,15 @@ static inline SignalState GetSignalStateByTrackdir(TileIndex tile, Trackdir trac
  */
 static inline void SetSignalStateByTrackdir(TileIndex tile, Trackdir trackdir, SignalState state)
 {
-	if (state == SIGNAL_STATE_GREEN) { // set 1
-		SetSignalStates(tile, GetSignalStates(tile) | SignalAlongTrackdir(trackdir));
+	Track track = TrackdirToTrack(trackdir);
+	if (IsPbsSignal(GetSignalType(tile, track))) {
+		SetSignalStates(tile, (GetSignalStates(tile) & ~SignalOnTrack(track)) | (state << (SignalOnTrack(track) == 0xC ? 2 : 0)));
 	} else {
-		SetSignalStates(tile, GetSignalStates(tile) & ~SignalAlongTrackdir(trackdir));
+		if (state == SIGNAL_STATE_GREEN) { // set 1
+			SetSignalStates(tile, GetSignalStates(tile) | SignalAlongTrackdir(trackdir));
+		} else {
+			SetSignalStates(tile, GetSignalStates(tile) & ~SignalAlongTrackdir(trackdir));
+		}
 	}
 }
 

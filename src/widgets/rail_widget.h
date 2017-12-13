@@ -84,12 +84,16 @@ enum BuildSignalWidgets {
 	WID_BS_SEMAPHORE_COMBO,    ///< Build a semaphore combo block signal
 	WID_BS_SEMAPHORE_PBS,      ///< Build a semaphore path signal.
 	WID_BS_SEMAPHORE_PBS_OWAY, ///< Build a semaphore one way path signal.
+	WID_BS_SEMAPHORE_PBS_LONG, ///< Build a semaphore long path signal.
+	WID_BS_SEMAPHORE_PBS_LONG_OWAY, ///< Build a semaphore one way long path signal.
 	WID_BS_ELECTRIC_NORM,      ///< Build an electric normal block signal
 	WID_BS_ELECTRIC_ENTRY,     ///< Build an electric entry block signal
 	WID_BS_ELECTRIC_EXIT,      ///< Build an electric exit block signal
 	WID_BS_ELECTRIC_COMBO,     ///< Build an electric combo block signal
 	WID_BS_ELECTRIC_PBS,       ///< Build an electric path signal.
 	WID_BS_ELECTRIC_PBS_OWAY,  ///< Build an electric one way path signal.
+	WID_BS_ELECTRIC_PBS_LONG,  ///< Build an electric long path signal.
+	WID_BS_ELECTRIC_PBS_LONG_OWAY,  ///< Build an electric one way long path signal.
 	WID_BS_CONVERT,            ///< Convert the signal.
 	WID_BS_DRAG_SIGNALS_DENSITY_LABEL,    ///< The current signal density.
 	WID_BS_DRAG_SIGNALS_DENSITY_DECREASE, ///< Decrease the signal density.

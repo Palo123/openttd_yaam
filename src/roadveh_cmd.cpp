@@ -730,7 +730,7 @@ int RoadVehicle::UpdateSpeed()
 			return this->DoUpdateSpeed(this->overtaking != 0 ? 512 : 256, 0, this->GetCurrentMaxSpeed());
 
 		case AM_REALISTIC:
-			return this->DoUpdateSpeed(this->GetAcceleration() + (this->overtaking != 0 ? 256 : 0), this->GetAccelerationStatus() == AS_BRAKE ? 0 : 4, this->GetCurrentMaxSpeed());
+			return this->DoUpdateSpeed(this->GetAcceleration(AM_REALISTIC) + (this->overtaking != 0 ? 256 : 0), this->GetAccelerationStatus() == AS_BRAKE ? 0 : 4, this->GetCurrentMaxSpeed());
 	}
 }
 
@@ -819,7 +819,7 @@ static void RoadVehCheckOvertake(RoadVehicle *v, RoadVehicle *u)
 	/* Can't overtake a vehicle that is moving faster than us. If the vehicle in front is
 	 * accelerating, take the maximum speed for the comparison, else the current speed.
 	 * Original acceleration always accelerates, so always use the maximum speed. */
-	int u_speed = (_settings_game.vehicle.roadveh_acceleration_model == AM_ORIGINAL || u->GetAcceleration() > 0) ? u->GetCurrentMaxSpeed() : u->cur_speed;
+	int u_speed = (_settings_game.vehicle.roadveh_acceleration_model == AM_ORIGINAL || u->GetAcceleration((AccelerationModel)_settings_game.vehicle.roadveh_acceleration_model) > 0) ? u->GetCurrentMaxSpeed() : u->cur_speed;
 	if (u_speed >= v->GetCurrentMaxSpeed() &&
 			!(u->vehstatus & VS_STOPPED) &&
 			u->cur_speed != 0) {

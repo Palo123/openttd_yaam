@@ -1312,6 +1312,23 @@ static bool MaxVehiclesChanged(int32 p1)
 	return true;
 }
 
+static bool MaxYellowSpeedChanged(int32 p1)
+{
+	if (_settings_game.pf.double_yellow_speed < p1) {
+		ShowErrorMessage(STR_CONFIG_SETTING_YELLOW_DOUBLE_YELLOW_SMALLER, INVALID_STRING_ID, WL_ERROR);
+		return false;
+	}
+	return true;
+}
+
+static bool MaxDoubleYellowSpeedChanged(int32 p1)
+{
+	if (_settings_game.pf.yellow_speed > p1) {
+		ShowErrorMessage(STR_CONFIG_SETTING_YELLOW_DOUBLE_YELLOW_SMALLER, INVALID_STRING_ID, WL_ERROR);
+		return false;
+	}
+	return true;
+}
 
 #ifdef ENABLE_NETWORK
 

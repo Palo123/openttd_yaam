@@ -61,7 +61,7 @@ byte FreightWagonMult(CargoID cargo);
 
 void CheckTrainsLengths();
 
-void FreeTrainTrackReservation(const Train *v);
+void FreeTrainTrackReservation(const Train *v, TileIndex origin = INVALID_TILE, Trackdir orig_td = INVALID_TRACKDIR);
 bool TryPathReserve(Train *v, bool mark_as_stuck = false, bool first_tile_okay = false);
 
 int GetTrainStopLocation(StationID station_id, TileIndex tile, const Train *v, int *station_ahead, int *station_length);
@@ -98,6 +98,11 @@ struct Train FINAL : public GroundVehicle<Train, VEH_TRAIN> {
 	TrainForceProceedingByte force_proceed;
 	RailTypeByte railtype;
 	RailTypes compatible_railtypes;
+	
+	uint16 planned_speed; ///< planned speed that we are trying to achieve
+	uint16 max_signal_speed; ///< max speed by last passed signal
+	uint16 yellow_signal_speed; ///< stored maximum speed on next yellow signal
+	uint16 double_yellow_signal_speed; ///< stored maximum speed on next double yellow signal
 
 	/** Ticks waiting in front of a signal, ticks being stuck or a counter for forced proceeding through signals. */
 	uint16 wait_counter;
@@ -264,7 +269,7 @@ protected: // These functions should not be called outside acceleration code.
 	 */
 	inline AccelStatus GetAccelerationStatus() const
 	{
-		return (this->vehstatus & VS_STOPPED) || HasBit(this->flags, VRF_REVERSING) || HasBit(this->flags, VRF_TRAIN_STUCK) ? AS_BRAKE : AS_ACCEL;
+		return (this->vehstatus & VS_STOPPED) || HasBit(this->flags, VRF_REVERSING) || HasBit(this->flags, VRF_TRAIN_STUCK) || (_settings_game.vehicle.train_acceleration_model == AM_YAAM && this->cur_speed > this->planned_speed) ? AS_BRAKE : AS_ACCEL;
 	}
 
 	/**

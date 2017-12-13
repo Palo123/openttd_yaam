@@ -426,6 +426,31 @@ void AfterLoadVehicles(bool part_of_load)
 			}
 		}
 	}
+	
+	/* set non zero max signal speed */
+	
+	if (part_of_load && IsSavegameVersionBefore(197)) {
+		FOR_ALL_VEHICLES(v) {
+			if (v->type == VEH_TRAIN) {
+				Train *t = Train::From(v);
+				if (t->IsFrontEngine()) {
+					t->max_signal_speed = UINT16_MAX;
+				}
+			}
+		}
+	}
+	
+	if (part_of_load && IsSavegameVersionBefore(197)) {
+		FOR_ALL_VEHICLES(v) {
+			if (v->type == VEH_TRAIN) {
+				Train *t = Train::From(v);
+				if (t->IsFrontEngine()) {
+					t->double_yellow_signal_speed = UINT16_MAX;
+					t->yellow_signal_speed = UINT16_MAX;
+				}
+			}
+		}
+	}
 
 	FOR_ALL_VEHICLES(v) {
 		switch (v->type) {
@@ -722,6 +747,10 @@ const SaveLoad *GetVehicleDescription(VehicleType vt)
 		SLE_CONDNULL(2, 2, 59),
 
 		 SLE_CONDVAR(Train, wait_counter,        SLE_UINT16,                 136, SL_MAX_VERSION),
+		 SLE_CONDVAR(Train, max_signal_speed,    SLE_UINT16,                 197, SL_MAX_VERSION),
+		 SLE_CONDVAR(Train, yellow_signal_speed,    SLE_UINT16,                 197, SL_MAX_VERSION),
+		 SLE_CONDVAR(Train, double_yellow_signal_speed,    SLE_UINT16,                 197, SL_MAX_VERSION),
+		 SLE_CONDVAR(Train, planned_speed,    SLE_UINT16,                 197, SL_MAX_VERSION),
 
 		SLE_CONDNULL(2, 2, 19),
 		 SLE_CONDVAR(Train, gv_flags,            SLE_UINT16,                 139, SL_MAX_VERSION),

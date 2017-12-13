@@ -105,10 +105,12 @@ void ResolveRailTypeGUISprites(RailtypeInfo *rti)
 	/* Array of default GUI signal sprite numbers. */
 	const SpriteID _signal_lookup[2][SIGTYPE_END] = {
 		{SPR_IMG_SIGNAL_ELECTRIC_NORM,  SPR_IMG_SIGNAL_ELECTRIC_ENTRY, SPR_IMG_SIGNAL_ELECTRIC_EXIT,
-		 SPR_IMG_SIGNAL_ELECTRIC_COMBO, SPR_IMG_SIGNAL_ELECTRIC_PBS,   SPR_IMG_SIGNAL_ELECTRIC_PBS_OWAY},
+		 SPR_IMG_SIGNAL_ELECTRIC_COMBO, SPR_IMG_SIGNAL_ELECTRIC_PBS,   SPR_IMG_SIGNAL_ELECTRIC_PBS_OWAY,
+		 SPR_IMG_SIGNAL_ELECTRIC_PBS_LONG, SPR_IMG_SIGNAL_ELECTRIC_PBS_LONG_OWAY},
 
 		{SPR_IMG_SIGNAL_SEMAPHORE_NORM,  SPR_IMG_SIGNAL_SEMAPHORE_ENTRY, SPR_IMG_SIGNAL_SEMAPHORE_EXIT,
-		 SPR_IMG_SIGNAL_SEMAPHORE_COMBO, SPR_IMG_SIGNAL_SEMAPHORE_PBS,   SPR_IMG_SIGNAL_SEMAPHORE_PBS_OWAY},
+		 SPR_IMG_SIGNAL_SEMAPHORE_COMBO, SPR_IMG_SIGNAL_SEMAPHORE_PBS,   SPR_IMG_SIGNAL_SEMAPHORE_PBS_OWAY,
+		 SPR_IMG_SIGNAL_SEMAPHORE_PBS_LONG, SPR_IMG_SIGNAL_SEMAPHORE_PBS_LONG_OWAY},
 	};
 
 	for (SignalType type = SIGTYPE_NORMAL; type < SIGTYPE_END; type = (SignalType)(type + 1)) {
@@ -1165,7 +1167,7 @@ CommandCost CmdBuildSingleSignal(TileIndex tile, DoCommandFlag flags, uint32 p1,
 
 		if (IsPbsSignal(sigtype)) {
 			/* PBS signals should show red unless they are on reserved tiles without a train. */
-			uint mask = GetPresentSignals(tile) & SignalOnTrack(track);
+			uint mask = GetSignalStates(tile) & SignalOnTrack(track);
 			SetSignalStates(tile, (GetSignalStates(tile) & ~mask) | ((HasBit(GetRailReservationTrackBits(tile), track) && EnsureNoVehicleOnGround(tile).Succeeded() ? UINT_MAX : 0) & mask));
 		}
 		MarkTileDirtyByTile(tile);
@@ -1887,14 +1889,21 @@ static void DrawSingleSignal(TileIndex tile, const RailtypeInfo *rti, Track trac
 
 	SignalType type       = GetSignalType(tile, track);
 	SignalVariant variant = GetSignalVariant(tile, track);
+	
+	SignalState condition_with_pbs = IsPbsSignal(type) ? GetSignalStateByTrackdir(tile, (Trackdir) track) : condition;
+	
+	SpriteID sprite = GetCustomSignalSprite(rti, tile, type, variant, condition_with_pbs);
 
-	SpriteID sprite = GetCustomSignalSprite(rti, tile, type, variant, condition);
 	if (sprite != 0) {
 		sprite += image;
 	} else {
-		/* Normal electric signals are stored in a different sprite block than all other signals. */
-		sprite = (type == SIGTYPE_NORMAL && variant == SIG_ELECTRIC) ? SPR_ORIGINAL_SIGNALS_BASE : SPR_SIGNALS_BASE - 16;
-		sprite += type * 16 + variant * 64 + image * 2 + condition + (type > SIGTYPE_LAST_NOPBS ? 64 : 0);
+		if (IsPbsSignal(type)) {
+			sprite = SPR_IMG_SIGNAL_PBS_WITH_YELLOW + image * 4 + condition_with_pbs + (type != SIGTYPE_PBS && type != SIGTYPE_PBS_LONG) * 32 + variant * 64 + (variant && side ? 64 : 0) + IsPbsSignalLong(type) * 192;			
+		} else {
+			/* Normal electric signals are stored in a different sprite block than all other signals. */
+			sprite = (type == SIGTYPE_NORMAL && variant == SIG_ELECTRIC) ? SPR_ORIGINAL_SIGNALS_BASE : SPR_SIGNALS_BASE - 16;
+			sprite += type * 16 + variant * 64 + image * 2 + condition_with_pbs + (type > SIGTYPE_LAST_NOPBS ? 64 : 0);
+		}
 	}
 
 	AddSortableSpriteToDraw(sprite, PAL_NONE, x, y, 1, 1, BB_HEIGHT_UNDER_BRIDGE, GetSaveSlopeZ(x, y, track));
@@ -2711,6 +2720,9 @@ static TrackStatus GetTileTrackStatus_Track(TileIndex tile, TransportType mode, 
 			trackbits = GetTrackBits(tile);
 			byte a = GetPresentSignals(tile);
 			uint b = GetSignalStates(tile);
+      
+      if (IsPbsSignal(GetSignalType(tile, TRACK_UPPER)) && (b & SignalOnTrack(TRACK_UPPER))) b |= SignalOnTrack(TRACK_UPPER);
+      if (IsPbsSignal(GetSignalType(tile, TRACK_LOWER)) && (b & SignalOnTrack(TRACK_LOWER))) b |= SignalOnTrack(TRACK_LOWER);
 
 			b &= a;
 

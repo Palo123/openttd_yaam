@@ -81,6 +81,7 @@ static const uint VEHICLE_LENGTH = 8;
 enum AccelerationModel {
 	AM_ORIGINAL,
 	AM_REALISTIC,
+	AM_YAAM,
 };
 
 /** Visualisation contexts of vehicles and engines. */

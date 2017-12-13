@@ -2952,6 +2952,37 @@ bool AfterLoadGame()
 			}
 		}
 	}
+	
+	if (IsSavegameVersionBefore(197)) {
+	  for (TileIndex t = 0; t < map_size; t++) {
+	    if (IsTileType(t, MP_RAILWAY) && HasSignals(t)) {
+			  TrackBits tracks = GetTrackBits(t);
+			  Track track = FindFirstTrack(tracks);
+			  if (HasSignalOnTrack(t, track)) {
+			  	if (IsPbsSignal(GetSignalType(t, track))) {
+			  		Trackdir td = TrackToTrackdir(track);
+			  		if (!HasSignalOnTrackdir(t, td)) {
+			  			td = ReverseTrackdir(td);
+						}						  
+						SetSignalStateByTrackdir(t, td, GetSignalStates(t) & SignalAlongTrackdir(td) ? SIGNAL_STATE_GREEN : SIGNAL_STATE_RED);
+					}
+				}
+				tracks = KillFirstBit(tracks);
+				if (tracks != TRACK_BIT_NONE) {
+				  track = FindFirstTrack(tracks);
+				  if (HasSignalOnTrack(t, track)) {
+				  	if (IsPbsSignal(GetSignalType(t, track))) {
+				  		Trackdir td = TrackToTrackdir(track);
+				  		if (!HasSignalOnTrackdir(t, td)) {
+				  			td = ReverseTrackdir(td);
+							}						  
+							SetSignalStateByTrackdir(t, td, GetSignalStates(t) & SignalAlongTrackdir(td) ? SIGNAL_STATE_GREEN : SIGNAL_STATE_RED);
+						}
+					}
+				}
+			}
+	  }
+	}
 
 	/*
 	 * Only keep order-backups for network clients (and when replaying).

@@ -14,6 +14,8 @@ bin/baseset/*
 !bin/baseset/no_sound.obs
 !bin/baseset/no_music.obm
 !bin/baseset/orig_*.obm
+!bin/baseset/PBS_4_Aspects.grf
+!bin/baseset/PBS_4_Aspects2.grf
 !bin/scripts
 bin/scripts/*
 !bin/scripts/*.example

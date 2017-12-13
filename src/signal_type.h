@@ -29,9 +29,11 @@ enum SignalType {
 	SIGTYPE_COMBO      = 3, ///< presignal inter-block
 	SIGTYPE_PBS        = 4, ///< normal pbs signal
 	SIGTYPE_PBS_ONEWAY = 5, ///< no-entry signal
+	SIGTYPE_PBS_LONG   = 6, ///< pbs signal with 3 reservations
+	SIGTYPE_PBS_LONG_ONEWAY = 7, ///< one way pbs signal with 3 reservations
 
 	SIGTYPE_END,
-	SIGTYPE_LAST       = SIGTYPE_PBS_ONEWAY,
+	SIGTYPE_LAST       = SIGTYPE_PBS_LONG_ONEWAY,
 	SIGTYPE_LAST_NOPBS = SIGTYPE_COMBO,
 };
 /** Helper information for extract tool. */
@@ -46,6 +48,8 @@ template <> struct EnumPropsT<SignalType> : MakeEnumPropsT<SignalType, byte, SIG
 enum SignalState {
 	SIGNAL_STATE_RED   = 0, ///< The signal is red
 	SIGNAL_STATE_GREEN = 1, ///< The signal is green
+  SIGNAL_STATE_YELLOW = 2, ///< The signal is yellow
+  SIGNAL_STATE_DOUBLE_YELLOW = 3, ///< The signal is double yellow
 };
 
 #endif /* SIGNAL_TYPE_H */
