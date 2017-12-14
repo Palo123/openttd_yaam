@@ -1608,6 +1608,7 @@ static SettingsContainer &GetSettingsTree()
 			{
 				physics->Add(new SettingEntry("vehicle.train_acceleration_model"));
 				physics->Add(new SettingEntry("vehicle.yaam_multiplier"));
+				physics->Add(new SettingEntry("vehicle.yaam_hard"));
 				physics->Add(new SettingEntry("vehicle.train_slope_steepness"));
 				physics->Add(new SettingEntry("vehicle.wagon_speed_limits"));
 				physics->Add(new SettingEntry("vehicle.freight_trains"));

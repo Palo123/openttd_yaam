@@ -1520,16 +1520,24 @@ void Train::UpdateDeltaXY(Direction direction)
 static void MarkTrainAsStuck(Train *v)
 {
 	if (!HasBit(v->flags, VRF_TRAIN_STUCK)) {
+		
+		if (_settings_game.vehicle.train_acceleration_model == AM_YAAM) {
+			if (_settings_game.vehicle.yaam_hard) {
+				v->vehstatus |= VS_TRAIN_SLOWING;
+				return;
+			} else {
+				if (v->cur_speed > 25) {
+					v->breakdown_ctr = 2;
+					v->breakdown_delay = 200;
+				}
+			}
+		}
 		/* It is the first time the problem occurred, set the "train stuck" flag. */
 		SetBit(v->flags, VRF_TRAIN_STUCK);
 
 		v->wait_counter = 0;
 
 		/* Stop train */
-		if (v->cur_speed > 25) {
-		  v->breakdown_ctr = 2;
-		  v->breakdown_delay = 200;
-		}
 		v->cur_speed = 0;
 		v->subspeed = 0;
 		v->SetLastSpeed();
@@ -3805,23 +3813,39 @@ bool TrainController(Train *v, Vehicle *nomove, bool reverse)
 						if (HasBit(v->flags, VRF_TRAIN_STUCK)) return false;
 
 						if (!HasSignalOnTrackdir(gp.new_tile, ReverseTrackdir(i))) {
-							if (v->cur_speed > 25) {
-							  v->breakdown_ctr = 2;
-							  v->breakdown_delay = 200;
+							if (_settings_game.vehicle.train_acceleration_model == AM_YAAM) {
+								if (_settings_game.vehicle.yaam_hard) {
+									v->vehstatus |= VS_TRAIN_SLOWING;
+								} else {
+									if (v->cur_speed > 25) {
+										v->breakdown_ctr = 2;
+										v->breakdown_delay = 200;
+									}
+								}
 							}
-							v->cur_speed = 0;
-							v->subspeed = 0;
-							v->progress = 255 - 100;
-							if (!_settings_game.pf.reverse_at_signals || ++v->wait_counter < _settings_game.pf.wait_oneway_signal * 20) return false;
+							if (!(_settings_game.vehicle.train_acceleration_model == AM_YAAM && _settings_game.vehicle.yaam_hard)) {
+								v->cur_speed = 0;
+								v->subspeed = 0;
+								v->progress = 255 - 100;
+							}
+							if (v->cur_speed == 0 && (!_settings_game.pf.reverse_at_signals || ++v->wait_counter < _settings_game.pf.wait_oneway_signal * 20)) return false;
 						} else if (HasSignalOnTrackdir(gp.new_tile, i)) {
-							if (v->cur_speed > 25) {
-							  v->breakdown_ctr = 2;
-							  v->breakdown_delay = 200;
+							if (_settings_game.vehicle.train_acceleration_model == AM_YAAM) {
+								if (_settings_game.vehicle.yaam_hard) {
+									v->vehstatus |= VS_TRAIN_SLOWING;
+								} else {
+									if (v->cur_speed > 25) {
+										v->breakdown_ctr = 2;
+										v->breakdown_delay = 200;
+									}
+								}
 							}
-							v->cur_speed = 0;
-							v->subspeed = 0;
-							v->progress = 255 - 10;
-							if (!_settings_game.pf.reverse_at_signals || ++v->wait_counter < _settings_game.pf.wait_twoway_signal * 73) {
+							if (!(_settings_game.vehicle.train_acceleration_model == AM_YAAM && _settings_game.vehicle.yaam_hard)) {
+								v->cur_speed = 0;
+								v->subspeed = 0;
+								v->progress = 255 - 10;
+							}
+							if (v->cur_speed == 0 && (!_settings_game.pf.reverse_at_signals || ++v->wait_counter < _settings_game.pf.wait_twoway_signal * 73)) {
 								DiagDirection exitdir = TrackdirToExitdir(i);
 								TileIndex o_tile = TileAddByDiagDir(gp.new_tile, exitdir);
 
@@ -3839,9 +3863,13 @@ bool TrainController(Train *v, Vehicle *nomove, bool reverse)
 						if (!_settings_game.pf.reverse_at_signals && !HasOnewaySignalBlockingTrackdir(gp.new_tile, i) &&
 								UpdateSignalsOnSegment(v->tile, enterdir, v->owner) == SIGSEG_PBS) {
 							v->wait_counter = 0;
-							return false;
+							if (!(_settings_game.vehicle.train_acceleration_model == AM_YAAM && _settings_game.vehicle.yaam_hard)) {
+								return false;
+							}
 						}
-						goto reverse_train_direction;
+						if (!(_settings_game.vehicle.train_acceleration_model == AM_YAAM && _settings_game.vehicle.yaam_hard)) {
+							goto reverse_train_direction;
+						}
 					} else {
 						TryReserveRailTrack(gp.new_tile, TrackBitsToTrack(chosen_track), false);
 					}
@@ -4242,7 +4270,9 @@ static bool TrainApproachingLineEnd(Train *v, bool signal, bool reverse)
 	 * we only get odd x offsets there. */
 	if (!signal && x + (v->gcache.cached_veh_length + 1) / 2 * (IsDiagonalDirection(v->direction) ? 1 : 2) >= TILE_SIZE) {
 		/* we are too near the tile end, reverse now */
-		v->cur_speed = 0;
+		if (!(_settings_game.vehicle.train_acceleration_model == AM_YAAM && _settings_game.vehicle.yaam_hard)) {
+			v->cur_speed = 0;
+		}
 		if (reverse) ReverseTrainDirection(v);
 		return false;
 	}
