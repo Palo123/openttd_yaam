@@ -3161,9 +3161,11 @@ static VehicleEnterTileStatus VehicleEnter_Station(Vehicle *v, TileIndex tile, i
 			if (x == stop) {
 				return VETSB_ENTERED_STATION | (VehicleEnterTileStatus)(station_id << VETS_STATION_ID_OFFSET); // enter station
 			} else if (x < stop) {
-				v->vehstatus |= VS_TRAIN_SLOWING;
-				uint16 spd = max(0, (stop - x) * 20 - 15);
-				if (spd < v->cur_speed) v->cur_speed = spd;
+				if (_settings_game.vehicle.train_acceleration_model != AM_YAAM) {
+					v->vehstatus |= VS_TRAIN_SLOWING;
+					uint16 spd = max(0, (stop - x) * 20 - 15);
+					if (spd < v->cur_speed) v->cur_speed = spd;
+				}
 			}
 		}
 	} else if (v->type == VEH_ROAD) {

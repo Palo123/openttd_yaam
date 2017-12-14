@@ -1240,8 +1240,6 @@ bool Vehicle::HandleBreakdown()
 			return false;
 
 		case 2:
-			this->breakdown_ctr = 1;
-
 			if (this->breakdowns_since_last_service != 255) {
 				this->breakdowns_since_last_service++;
 			}
@@ -1250,6 +1248,9 @@ bool Vehicle::HandleBreakdown()
 				/* Aircraft just need this flag, the rest is handled elsewhere */
 				this->vehstatus |= VS_AIRCRAFT_BROKEN;
 			} else {
+				if (this->type == VEH_TRAIN && _settings_game.vehicle.train_acceleration_model == AM_YAAM) {
+					if (cur_speed > 15u) return false;
+				}
 				this->cur_speed = 0;
 
 				if (!PlayVehicleSound(this, VSE_BREAKDOWN)) {
@@ -1264,6 +1265,7 @@ bool Vehicle::HandleBreakdown()
 					if (u != NULL) u->animation_state = this->breakdown_delay * 2;
 				}
 			}
+			this->breakdown_ctr = 1;
 
 			this->MarkDirty(); // Update graphics after speed is zeroed
 			SetWindowDirty(WC_VEHICLE_VIEW, this->index);

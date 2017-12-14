@@ -2250,14 +2250,14 @@ static uint16 GetYellowSignalSpeed(Train *v, SignalState sig_state) {
 			max_signal_speed = v->yellow_signal_speed > 0 ? v->yellow_signal_speed : _settings_game.pf.yellow_speed * (GetRailType(v->tile) == RAILTYPE_MAGLEV ? 2 : 1);
 			v->planned_speed = max_signal_speed;
 		} else {
-		  max_signal_speed = _settings_game.pf.yellow_speed * (GetRailType(v->tile) == RAILTYPE_MAGLEV ? 2 : 1);
+			max_signal_speed = _settings_game.pf.yellow_speed * (GetRailType(v->tile) == RAILTYPE_MAGLEV ? 2 : 1);
 		}
 	} else if (sig_state == SIGNAL_STATE_DOUBLE_YELLOW) {
 		if (_settings_game.vehicle.train_acceleration_model == AM_YAAM) { 
 			max_signal_speed = v->double_yellow_signal_speed > 0 ? v->double_yellow_signal_speed : _settings_game.pf.double_yellow_speed * (GetRailType(v->tile) == RAILTYPE_MAGLEV ? 2 : 1);
 			v->planned_speed = max_signal_speed;
 		} else {
-		  max_signal_speed = _settings_game.pf.double_yellow_speed * (GetRailType(v->tile) == RAILTYPE_MAGLEV ? 2 : 1);
+			max_signal_speed = _settings_game.pf.double_yellow_speed * (GetRailType(v->tile) == RAILTYPE_MAGLEV ? 2 : 1);
 		}
 	}
 	return max_signal_speed;
@@ -2299,7 +2299,7 @@ static SignalState FindExtendPbs(Train *v, TileIndex tile, Trackdir trackdir, by
 		if (HasStationTileRail(pbs_tile) /* %% (orders != NULL */) {
 			StationID sid = GetStationIndex(pbs_tile);			
 			/* Don't extend reservation, if we found our final destination, except when there is block signal ahead */
-			if (v->current_order.ShouldStopAtStation(v, sid)) {
+			if (IsRailStationTile(pbs_tile) && v->current_order.ShouldStopAtStation(v, sid)) {
 				if (!_settings_game.pf.slow_down_station) {
 					(*nof_extends) = 0;
 					return SIGNAL_STATE_GREEN;
@@ -2540,17 +2540,17 @@ static void CheckNextTrainTile(Train *v)
 			if (_settings_game.vehicle.train_acceleration_model == AM_YAAM) {
 				if (v->planned_speed < new_signal_speed) {
 					if (_settings_game.pf.watch_next_signal) {
-				  	v->planned_speed = new_signal_speed;
-				  	v->max_signal_speed = new_signal_speed;
-				  } else {
-					  v->planned_speed = v->max_signal_speed;
+						v->planned_speed = new_signal_speed;
+						v->max_signal_speed = new_signal_speed;
+					} else {
+						v->planned_speed = v->max_signal_speed;
 					}
 				}
 				if (distance <= max(GetBrakingDistance(v, new_signal_speed, height, distance / 10) * 10 + 10, 10u)) {
 					v->planned_speed = new_signal_speed;
 				}	
 			} else if (_settings_game.pf.watch_next_signal) {
-			  v->max_signal_speed = max(v->max_signal_speed, new_signal_speed);
+				v->max_signal_speed = max(v->max_signal_speed, new_signal_speed);
 			}
 		}
 	}
@@ -3422,6 +3422,9 @@ int Train::UpdateSpeed()
 			
 		case AM_YAAM:
 			this->planned_speed = max(this->planned_speed, static_cast<uint16>(15));
+			if (this->vehstatus & VS_TRAIN_SLOWING) {
+				this->planned_speed = 15u;
+			}
 			this->planned_speed = min(this->planned_speed, this->GetCurrentMaxSpeed());
 			return this->DoUpdateSpeed(this->GetAcceleration(AM_YAAM), this->GetAccelerationStatus() == AS_BRAKE && !(this->vehstatus & VS_STOPPED) && !HasBit(this->flags, VRF_REVERSING) && !HasBit(this->flags, VRF_TRAIN_STUCK) ? planned_speed : 0, this->GetAccelerationStatus() == AS_BRAKE ? UINT16_MAX : planned_speed);
 	}
@@ -4244,9 +4247,9 @@ static bool TrainApproachingLineEnd(Train *v, bool signal, bool reverse)
 		return false;
 	}
 
-	if (_settings_game.vehicle.train_acceleration_model != AM_YAAM) {
 	/* slow down */
-		v->vehstatus |= VS_TRAIN_SLOWING;
+	v->vehstatus |= VS_TRAIN_SLOWING;
+	if (_settings_game.vehicle.train_acceleration_model != AM_YAAM) {
 		uint16 break_speed = _breakdown_speeds[x & 0xF];
 		if (break_speed < v->cur_speed) v->cur_speed = break_speed;
 	}
@@ -4324,9 +4327,10 @@ static bool TrainCheckIfLineEnds(Train *v, bool reverse)
 	int t = v->breakdown_ctr;
 	if (t > 1) {
 		v->vehstatus |= VS_TRAIN_SLOWING;
-
-		uint16 break_speed = _breakdown_speeds[GB(~t, 4, 4)];
-		if (break_speed < v->cur_speed) v->cur_speed = break_speed;
+		if (_settings_game.vehicle.train_acceleration_model != AM_YAAM) {
+			uint16 break_speed = _breakdown_speeds[GB(~t, 4, 4)];
+			if (break_speed < v->cur_speed) v->cur_speed = break_speed;
+		}
 	} else {
 		v->vehstatus &= ~VS_TRAIN_SLOWING;
 	}
